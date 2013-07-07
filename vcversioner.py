@@ -44,9 +44,6 @@ def find_version(include_dev_version=True, version_file='version.txt',
         with open(version_file, 'r') as infile:
             raw_version = infile.read()
         version_source = repr(version_file)
-    elif version_file is not None:
-        with open(version_file, 'w') as outfile:
-            outfile.write(raw_version)
 
 
     # try to parse the version into something usable.
@@ -56,6 +53,10 @@ def find_version(include_dev_version=True, version_file='version.txt',
         print("%r (from %s) couldn't be parsed into a version" % (
             raw_version, version_source))
         sys.exit(2)
+
+    if version_file is not None:
+        with open(version_file, 'w') as outfile:
+            outfile.write(raw_version)
 
     if commits == '0' or not include_dev_version:
         version = tag_version
