@@ -29,6 +29,9 @@ exceedingly simple::
   )
 
 The presence of a ``vcversioner`` argument automagically activates vcversioner
-and updates the project's version.
+and updates the project's version. In most cases, the following line should
+also be added to ``MANIFEST.in``::
+
+  include version.txt
 
 More advanced usage is documented separately and will be linked here presently.
