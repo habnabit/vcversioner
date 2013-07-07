@@ -3,6 +3,10 @@ Welcome to vcversioner's documentation!
 
 The code is available on github: https://github.com/habnabit/vcversioner
 
+`Elevator pitch`_: you can write a ``setup.py`` with no version number
+specified, and vcversioner will find a recent properly-formatted git tag and
+extract the version number from it.
+
 To quote myself:
 
     It's much more convenient to be able to use your version control system's
@@ -162,5 +166,6 @@ Indices and tables
 * :ref:`search`
 
 
+.. _Elevator pitch: http://en.wikipedia.org/wiki/Elevator_pitch
 .. _pip: https://pypi.python.org/pypi/pip
 .. _PEP 386: http://www.python.org/dev/peps/pep-0386/

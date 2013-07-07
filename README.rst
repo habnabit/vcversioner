@@ -6,6 +6,10 @@ vcversioner
 
 In-depth documentation: https://vcversioner.readthedocs.org/en/latest/
 
+`Elevator pitch`_: you can write a ``setup.py`` with no version number
+specified, and vcversioner will find a recent properly-formatted git tag and
+extract the version number from it.
+
 To quote myself:
 
     It's much more convenient to be able to use your version control system's
@@ -35,3 +39,5 @@ and updates the project's version. In most cases, the following line should
 also be added to ``MANIFEST.in``::
 
   include version.txt
+
+.. _Elevator pitch: http://en.wikipedia.org/wiki/Elevator_pitch
