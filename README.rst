@@ -4,6 +4,9 @@
 vcversioner
 ===========
 
+In-depth documentation:
+https://docs.readthedocs.org/en/latest/getting_started.html
+
 To quote myself:
 
     It's much more convenient to be able to use your version control system's
@@ -33,5 +36,3 @@ and updates the project's version. In most cases, the following line should
 also be added to ``MANIFEST.in``::
 
   include version.txt
-
-More advanced usage is documented separately and will be linked here presently.
