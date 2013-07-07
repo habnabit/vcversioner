@@ -177,13 +177,15 @@ __version__ = '1.0'
 __sha__ = 'gbeef'
 """
 
-class FakeDistribution(object):
+class Struct(object):
     pass
 
 def test_setup_astounding_success():
     "``find_version`` can be called through distutils too."
-    dist = FakeDistribution()
+    dist = Struct()
+    dist.metadata = Struct()
     vcversioner.setup(
         dist, 'vcversioner',
         {str('Popen'): basic_version, str('version_file'): None})
     assert dist.version == '1.0'
+    assert dist.metadata.version == '1.0'
