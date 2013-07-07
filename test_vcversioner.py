@@ -162,3 +162,14 @@ def test_namedtuple():
     assert version.version == '1.0.dev2'
     assert version.commits == '2'
     assert version.sha == 'gfeeb'
+
+
+class FakeDistribution(object):
+    pass
+
+def test_setup_astounding_success():
+    "``find_version`` can be called through distutils too."
+    dist = FakeDistribution()
+    vcversioner.setup(
+        dist, 'vcversioner', {'Popen': basic_version, 'version_file': None})
+    assert dist.version == ('1.0', '0', 'gbeef')
