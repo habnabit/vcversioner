@@ -12,6 +12,11 @@ import sys
 Version = collections.namedtuple('Version', 'version commits sha')
 
 
+_print = print
+def print(*a, **kw):
+    _print('vcversioner:', *a, **kw)
+
+
 def find_version(include_dev_version=True, version_file='version.txt',
                  git_args=('git', 'describe', '--tags', '--long'),
                  Popen=subprocess.Popen):
@@ -58,3 +63,7 @@ def find_version(include_dev_version=True, version_file='version.txt',
         version = '%s.dev%s' % (tag_version, commits)
 
     return Version(version, commits, sha)
+
+
+def setup(dist, attr, value):
+    dist.version = find_version(**value)
