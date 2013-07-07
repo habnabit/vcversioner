@@ -4,8 +4,7 @@
 vcversioner
 ===========
 
-In-depth documentation:
-https://docs.readthedocs.org/en/latest/getting_started.html
+In-depth documentation: https://vcversioner.readthedocs.org/en/latest/
 
 To quote myself:
 

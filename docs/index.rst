@@ -1,6 +1,8 @@
 Welcome to vcversioner's documentation!
 =======================================
 
+The code is available on github: https://github.com/habnabit/vcversioner
+
 To quote myself:
 
     It's much more convenient to be able to use your version control system's
