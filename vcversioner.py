@@ -151,4 +151,4 @@ def setup(dist, attr, value):
 
     """
 
-    dist.version = find_version(**value)
+    dist.version = find_version(**value).version

@@ -186,4 +186,4 @@ def test_setup_astounding_success():
     vcversioner.setup(
         dist, 'vcversioner',
         {str('Popen'): basic_version, str('version_file'): None})
-    assert dist.version == ('1.0', '0', 'gbeef')
+    assert dist.version == '1.0'
