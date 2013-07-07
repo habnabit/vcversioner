@@ -24,10 +24,10 @@ class RaisingFakePopen(object):
         self.kwargs = kwargs
         raise OSError('hi!')
 
-empty = FakePopen('')
-invalid = FakePopen('foob')
-basic_version = FakePopen('1.0-0-gbeef')
-dev_version = FakePopen('1.0-2-gfeeb')
+empty = FakePopen(b'')
+invalid = FakePopen(b'foob')
+basic_version = FakePopen(b'1.0-0-gbeef')
+dev_version = FakePopen(b'1.0-2-gfeeb')
 
 
 def test_astounding_success(tmpdir):
@@ -184,5 +184,6 @@ def test_setup_astounding_success():
     "``find_version`` can be called through distutils too."
     dist = FakeDistribution()
     vcversioner.setup(
-        dist, 'vcversioner', {'Popen': basic_version, 'version_file': None})
+        dist, 'vcversioner',
+        {str('Popen'): basic_version, str('version_file'): None})
     assert dist.version == ('1.0', '0', 'gbeef')

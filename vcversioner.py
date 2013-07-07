@@ -8,7 +8,6 @@ from __future__ import print_function, unicode_literals
 import collections
 import os
 import subprocess
-import sys
 
 
 Version = collections.namedtuple('Version', 'version commits sha')
@@ -79,11 +78,11 @@ def find_version(include_dev_version=True, version_file='version.txt',
     if not raw_version:
         if version_file is None:
             print('%r failed' % (git_args,))
-            sys.exit(2)
+            raise SystemExit(2)
         elif not os.path.exists(version_file):
             print("%r failed and %r isn't present." % (git_args, version_file))
             print("are you installing from a github tarball?")
-            sys.exit(2)
+            raise SystemExit(2)
         print("couldn't determine version from git; using %r" % version_file)
         with open(version_file, 'r') as infile:
             raw_version = infile.read()
@@ -96,7 +95,7 @@ def find_version(include_dev_version=True, version_file='version.txt',
     except ValueError:
         print("%r (from %s) couldn't be parsed into a version" % (
             raw_version, version_source))
-        sys.exit(2)
+        raise SystemExit(2)
 
     if version_file is not None:
         with open(version_file, 'w') as outfile:
