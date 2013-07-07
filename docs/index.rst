@@ -110,9 +110,10 @@ Customizing git commands
 ------------------------
 
 vcversioner by default executes ``git describe --tags --long`` to get version
-information. This means to describe the current commit, using all tags (as
-opposed to just unannotated tags), and always output the long format
-(``1.0-0-gdeadbeef`` instead of just ``1.0`` if the current commit is tagged).
+information. This command will output a string that describes the current
+commit, using all tags (as opposed to just unannotated tags), and always output
+the long format (``1.0-0-gdeadbeef`` instead of just ``1.0`` if the current
+commit is tagged).
 
 However, sometimes this isn't sufficient. If someone wanted to only use
 annotated tags, the git command could be amended like so::
