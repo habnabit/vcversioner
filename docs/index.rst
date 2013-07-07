@@ -30,7 +30,7 @@ exceedingly simple::
 
 The presence of a ``vcversioner`` argument automagically activates vcversioner
 and updates the project's version. The parameter to the ``vcversioner``
-argument can also be a dict of keyword arguments which :func:`find_version`
+argument can also be a dict of keyword arguments which :func:`.find_version`
 will be called with.
 
 To allow tarballs to be distributed without requiring a ``.git`` directory,
