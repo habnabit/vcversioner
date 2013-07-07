@@ -149,3 +149,16 @@ def test_version_file_disabled_Popen_raises(tmpdir):
         vcversioner.find_version(Popen=RaisingFakePopen(), version_file=None)
     assert excinfo.value.args[0] == 2
     assert not tmpdir.join('version.txt').check()
+
+def test_namedtuple():
+    "The output namedtuple has attribute names too."
+
+    version = vcversioner.find_version(Popen=basic_version, version_file=None)
+    assert version.version == '1.0'
+    assert version.commits == '0'
+    assert version.sha == 'gbeef'
+
+    version = vcversioner.find_version(Popen=dev_version, version_file=None)
+    assert version.version == '1.0.dev2'
+    assert version.commits == '2'
+    assert version.sha == 'gfeeb'
