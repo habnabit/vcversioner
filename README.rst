@@ -21,7 +21,7 @@ files is hard. This code got factored out into vcversioner.
 Basic usage
 -----------
 
-vcversioner installs itself as a distutils hook, which makes its use
+vcversioner installs itself as a setuptools hook, which makes its use
 exceedingly simple::
 
   from setuptools import setup
