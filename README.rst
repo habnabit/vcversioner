@@ -4,8 +4,6 @@
 vcversioner
 ===========
 
-In-depth documentation: https://vcversioner.readthedocs.org/en/latest/
-
 `Elevator pitch`_: you can write a ``setup.py`` with no version information
 specified, and vcversioner will find a recent, properly-formatted git tag and
 extract a version from it.

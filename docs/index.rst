@@ -1,10 +1,11 @@
-Welcome to vcversioner's documentation!
-=======================================
+===========
+vcversioner
+===========
 
 The code is available on github: https://github.com/habnabit/vcversioner
 
 .. include:: ../README.rst
-   :start-after: https://vcversioner.readthedocs.org/en/latest/
+   :start-line: 6
 
 
 ``vcversioner`` API reference
