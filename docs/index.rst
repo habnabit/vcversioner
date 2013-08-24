@@ -7,8 +7,8 @@ The code is available on github: https://github.com/habnabit/vcversioner
    :start-after: https://vcversioner.readthedocs.org/en/latest/
 
 
-``vcversioner`` reference
--------------------------
+``vcversioner`` API reference
+-----------------------------
 
 .. automodule:: vcversioner
    :members: find_version, setup
