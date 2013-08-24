@@ -12,3 +12,6 @@ The code is available on github: https://github.com/habnabit/vcversioner
 
 .. automodule:: vcversioner
    :members: find_version, setup
+
+
+.. |find_version| replace:: :func:`.find_version`
