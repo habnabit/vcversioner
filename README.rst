@@ -150,8 +150,62 @@ This behavior can be disabled by setting the ``include_dev_version`` parameter
 to ``False``. In that case, the aforementioned untagged commit's version would
 be just ``1.0``.
 
+
+Sphinx documentation
+--------------------
+
+`Sphinx`_ documentation is yet another place where version numbers get
+duplicated. Fortunately, since sphinx configuration is python code, vcversioner
+can be used there too. Assuming vcversioner is installed system-wide, this is
+quite easy. Simply change your ``conf.py`` to include::
+
+  import vcversioner
+  version = release = vcversioner.find_version().version
+
+If your current working directory while building documentation is not your
+project root, this will make a duplicate ``version.txt`` file in the
+documentation directory. In this case, it might be preferable to call
+|find_version| with ``version_file=None`` or ``version_file='../version.txt'``.
+
+If vcversioner is bundled with your project instead of relying on it being
+installed, you might have to add the following to your ``conf.py`` before
+``import vcversioner``::
+
+  import sys, os
+  sys.path.insert(0, os.path.abspath('..'))
+
+This line, or something with the same effect, is sometimes already present when
+using the sphinx ``autodoc`` extension.
+
+
+Read the Docs
+~~~~~~~~~~~~~
+
+Using vcversioner is even possible when building documentation on `Read the
+Docs`_. If vcversioner is bundled with your project, nothing further needs to
+be done. Otherwise, you need to tell Read the Docs to install vcversioner
+before it builds the documentation. This means using a ``requirements.txt``
+file.
+
+If your project is already set up to install dependencies with a
+``requirements.txt`` file, add ``vcversioner`` to it. Otherwise, create a
+``requirements.txt`` file. Assuming your documentation is in a ``docs``
+subdirectory of the main project directory, create ``docs/requirements.txt``
+containing a ``vcversioner`` line.
+
+Then, make the following changes to your project's configuration: (Project
+configuration is edited at e.g.
+https://readthedocs.org/dashboard/vcversioner/edit/)
+
+- Check the checkbox under **Use virtualenv**.
+- If there was no ``requirements.txt`` previously, set the **Requirements
+  file** to the newly-created one, e.g. ``docs/requirements.txt``.
+
+
 .. _Elevator pitch: http://en.wikipedia.org/wiki/Elevator_pitch
 .. _pip: https://pypi.python.org/pypi/pip
 .. _PEP 386: http://www.python.org/dev/peps/pep-0386/
+.. _Sphinx: http://sphinx-doc.org
+.. _Read the Docs: https://readthedocs.org/
 
 .. |find_version| replace:: ``find_version``
