@@ -155,15 +155,23 @@ Sphinx documentation
 `Sphinx`_ documentation is yet another place where version numbers get
 duplicated. Fortunately, since sphinx configuration is python code, vcversioner
 can be used there too. Assuming vcversioner is installed system-wide, this is
-quite easy. Simply change your ``conf.py`` to include::
+quite easy. Since Sphinx is typically run with the current working directory as
+``<your project root>/docs``, it's necessary to tell vcversioner where the
+project root is. Simply change your ``conf.py`` to include::
 
   import vcversioner
-  version = release = vcversioner.find_version().version
+  version = release = vcversioner.find_version(root='..').version
 
-If your current working directory while building documentation is not your
-project root, this will make a duplicate ``version.txt`` file in the
-documentation directory. In this case, it might be preferable to call
-|find_version| with ``version_file=None`` or ``version_file='../version.txt'``.
+This assumes that your project root is the parent directory of the current
+working directory. A slightly longer version which is a little more robust
+would be::
+
+  import vcversioner, os
+  version = release = vcversioner.find_version(
+      root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))).version
+
+This version is more robust because it finds the project root not relative to
+the current working directory but instead relative to the ``conf.py`` file.
 
 If vcversioner is bundled with your project instead of relying on it being
 installed, you might have to add the following to your ``conf.py`` before
