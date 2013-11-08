@@ -149,6 +149,45 @@ to ``False``. In that case, the aforementioned untagged commit's version would
 be just ``1.0``.
 
 
+Project roots
+-------------
+
+In order to prevent contamination from other git repositories, vcversioner in
+the 1.x version series will only look in the project root directory for a git
+repository. The project root defaults to the current working directory, which
+is often the case when running setup.py. This can be changed by specifying the
+``root`` parameter. Someone concerned with being able to run setup.py from
+directories other than the directory containing setup.py should determine the
+project root from ``__file__`` in setup.py::
+
+  from setuptools import setup
+  import os
+
+  setup(
+      # [...]
+      setup_requires=['vcversioner'],
+      vcversioner={
+          'root': os.path.dirname(os.path.abspath(__file__)),
+      },
+  )
+
+To get the same behavior in the 0.x version series, ``git_args`` can be set to
+include the ``--git-dir`` flag::
+
+  from setuptools import setup
+
+  setup(
+      # [...]
+      setup_requires=['vcversioner'],
+      vcversioner={
+          git_args=['git', '--git-dir', '%(root)s/.git', 'describe',
+                    '--tags', '--long'],
+      },
+  )
+
+By default, ``version.txt`` is also read from the project root.
+
+
 Sphinx documentation
 --------------------
 
