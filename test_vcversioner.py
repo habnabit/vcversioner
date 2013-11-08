@@ -70,6 +70,14 @@ def test_Popen_raises_but_version_file(tmpdir):
     version = vcversioner.find_version(Popen=RaisingFakePopen())
     assert version == ('1.0', '0', 'gbeef')
 
+def test_version_file_with_root(tmpdir):
+    "version.txt gets read from the project root by default."
+    with tmpdir.join('version.txt').open('w') as outfile:
+        outfile.write('1.0-0-gbeef')
+    version = vcversioner.find_version(
+        root=tmpdir.strpath, Popen=RaisingFakePopen())
+    assert version == ('1.0', '0', 'gbeef')
+
 def test_invalid_git(tmpdir):
     "Invalid output from git is a failure too."
     tmpdir.chdir()
@@ -109,7 +117,22 @@ def test_custom_git_args(tmpdir):
     popen = RaisingFakePopen()
     with pytest.raises(SystemExit):
         vcversioner.find_version(Popen=popen, git_args=('foo', 'bar'))
-    assert popen.args[0] == ('foo', 'bar')
+    assert popen.args[0] == ['foo', 'bar']
+
+def test_custom_git_args_substitutions(tmpdir):
+    "The command arguments have some substitutions performed."
+    tmpdir.chdir()
+    popen = RaisingFakePopen()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=popen, git_args=('foo', 'bar', '%(pwd)s', '%(root)s'))
+    assert popen.args[0] == ['foo', 'bar', tmpdir.strpath, tmpdir.strpath]
+
+def test_custom_git_args_substitutions_with_different_root(tmpdir):
+    "Specifying a different root will cause that root to be substituted."
+    popen = RaisingFakePopen()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=popen, root='/spam', git_args=('%(root)s',))
+    assert popen.args[0] == ['/spam']
 
 def test_custom_version_file(tmpdir):
     "The version.txt file can have a unique name."
