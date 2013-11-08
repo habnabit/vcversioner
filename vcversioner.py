@@ -36,8 +36,7 @@ def print(*a, **kw):
 
 def find_version(include_dev_version=True, root='%(pwd)s',
                  version_file='%(root)s/version.txt', version_module_paths=(),
-                 git_args=('git', '--git-dir', '%(root)s/.git', 'describe',
-                           '--tags', '--long'),
+                 git_args=('git', 'describe', '--tags', '--long'),
                  Popen=subprocess.Popen):
     """Find an appropriate version number from version control.
 
@@ -79,13 +78,10 @@ def find_version(include_dev_version=True, root='%(pwd)s',
                                  __version__, __sha__``.
 
     :param git_args: The git command to run to get a version. By default, this
-                     is ``git --git-dir %(root)s/.git describe --tags --long``.
-                     ``--git-dir`` is used to prevent contamination from git
-                     repositories which aren't the git repository of your
-                     project. Specify this as a list of string arguments
-                     including ``git``, e.g. ``['git', 'describe']``. Standard
-                     substitutions are performed on each value in the provided
-                     list.
+                     is ``git describe --tags --long``. Specify this as a list
+                     of string arguments including ``git``, e.g. ``['git',
+                     'describe']``. Standard substitutions are performed on
+                     each value in the provided list.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
