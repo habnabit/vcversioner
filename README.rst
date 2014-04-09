@@ -188,6 +188,23 @@ include the ``--git-dir`` flag::
 By default, ``version.txt`` is also read from the project root.
 
 
+Substitutions
+~~~~~~~~~~~~~
+
+As seen above, *root*, *version_file*, and *git_args* each support some
+substitutions:
+
+``%(root)s``
+  The value provided for *root*. This is not available for the *root*
+  parameter itself.
+
+``%(pwd)s``
+  The current working directory.
+
+``/`` will automatically be translated into the correct path separator for the
+current platform, such as ``:`` or ``\``.
+
+
 Sphinx documentation
 --------------------
 

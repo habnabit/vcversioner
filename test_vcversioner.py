@@ -215,7 +215,7 @@ def test_git_arg_path_translation(monkeypatch):
     popen = RaisingFakePopen()
     with pytest.raises(SystemExit):
         vcversioner.find_version(Popen=popen, git_args=['spam/eggs'], version_file=None)
-    assert popen.args == ['spam:eggs']
+    assert popen.args[0] == ['spam:eggs']
 
 
 def test_version_file_path_translation(monkeypatch):
