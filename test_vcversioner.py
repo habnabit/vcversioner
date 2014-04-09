@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 
+import os
+
 import pytest
 
 import vcversioner
@@ -28,6 +30,13 @@ empty = FakePopen(b'')
 invalid = FakePopen(b'foob')
 basic_version = FakePopen(b'1.0-0-gbeef')
 dev_version = FakePopen(b'1.0-2-gfeeb')
+
+
+class FakeOpen(object):
+    def __call__(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        raise OSError('hi!')
 
 
 def test_astounding_success(tmpdir):
@@ -199,6 +208,24 @@ def test_version_module_paths(tmpdir):
 __version__ = '1.0'
 __sha__ = 'gbeef'
 """
+
+def test_git_arg_path_translation(monkeypatch):
+    "/ is translated into the correct path separator in git arguments."
+    monkeypatch.setattr(os, 'sep', ':')
+    popen = RaisingFakePopen()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=popen, git_args=['spam/eggs'], version_file=None)
+    assert popen.args == ['spam:eggs']
+
+
+def test_version_file_path_translation(monkeypatch):
+    "/ is translated into the correct path separator for version.txt."
+    monkeypatch.setattr(os, 'sep', ':')
+    open = FakeOpen()
+    with pytest.raises(OSError):
+        vcversioner.find_version(Popen=basic_version, open=open, version_file='spam/eggs')
+    assert open.args[0] == 'spam:eggs'
+
 
 class Struct(object):
     pass

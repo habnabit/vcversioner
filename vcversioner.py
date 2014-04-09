@@ -38,7 +38,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
                  version_file='%(root)s/version.txt', version_module_paths=(),
                  git_args=('git', '--git-dir', '%(root)s/.git', 'describe',
                            '--tags', '--long'),
-                 Popen=subprocess.Popen):
+                 Popen=subprocess.Popen, open=open):
     """Find an appropriate version number from version control.
 
     It's much more convenient to be able to use your version control system's
@@ -88,6 +88,8 @@ def find_version(include_dev_version=True, root='%(pwd)s',
                      list.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
+
+    :param open: Defaults to ``open``. This is for testing.
 
     *root*, *version_file*, and *git_args* each support some substitutions:
 
