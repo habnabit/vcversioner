@@ -127,7 +127,7 @@ def test_custom_git_args_substitutions(tmpdir):
         vcversioner.find_version(Popen=popen, git_args=('foo', 'bar', '%(pwd)s', '%(root)s'))
     assert popen.args[0] == ['foo', 'bar', tmpdir.strpath, tmpdir.strpath]
 
-def test_custom_git_args_substitutions_with_different_root(tmpdir):
+def test_custom_git_args_substitutions_with_different_root():
     "Specifying a different root will cause that root to be substituted."
     popen = RaisingFakePopen()
     with pytest.raises(SystemExit):
