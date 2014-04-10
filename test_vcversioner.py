@@ -11,11 +11,12 @@ import vcversioner
 
 
 class FakePopen(object):
-    def __init__(self, output):
-        self.output = output
+    def __init__(self, stdout, stderr=''):
+        self.stdout = stdout
+        self.stderr = stderr
 
     def communicate(self):
-        return self.output, None
+        return self.stdout, self.stderr
 
     def __call__(self, *args, **kwargs):
         return self
@@ -30,6 +31,7 @@ empty = FakePopen(b'')
 invalid = FakePopen(b'foob')
 basic_version = FakePopen(b'1.0-0-gbeef')
 dev_version = FakePopen(b'1.0-2-gfeeb')
+git_failed = FakePopen(b'', b'fatal: whatever')
 
 
 class FakeOpen(object):
@@ -217,7 +219,6 @@ def test_git_arg_path_translation(monkeypatch):
         vcversioner.find_version(Popen=popen, git_args=['spam/eggs'], version_file=None)
     assert popen.args[0] == ['spam:eggs']
 
-
 def test_version_file_path_translation(monkeypatch):
     "/ is translated into the correct path separator for version.txt."
     monkeypatch.setattr(os, 'sep', ':')
@@ -225,6 +226,68 @@ def test_version_file_path_translation(monkeypatch):
     with pytest.raises(OSError):
         vcversioner.find_version(Popen=basic_version, open=open, version_file='spam/eggs')
     assert open.args[0] == 'spam:eggs'
+
+def test_git_output_on_no_version_file(capsys):
+    "The output from git is shown if it failed and the version file is disabled."
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=git_failed, version_file=None, git_args=[])
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        'vcversioner: [] failed.\n'
+        'vcversioner: -- git output follows --\n'
+        'vcversioner: fatal: whatever\n')
+
+def test_git_output_on_version_file_absent(tmpdir, capsys):
+    "The output from git is shown if it failed and the version file doesn't exist."
+    tmpdir.chdir()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=git_failed, version_file='version.txt', git_args=[])
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        "vcversioner: [] failed and %r isn't present.\n"
+        'vcversioner: are you installing from a github tarball?\n'
+        'vcversioner: -- git output follows --\n'
+        'vcversioner: fatal: whatever\n' % ('version.txt',))
+
+def test_git_output_on_version_unparsable(tmpdir, capsys):
+    "The output from git is shown if it failed and the version couldn't be parsed."
+    tmpdir.chdir()
+    tmpdir.join('version.txt').write('doof')
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=git_failed, version_file='version.txt', git_args=[])
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        "vcversioner: %r (from %r) couldn't be parsed into a version.\n"
+        'vcversioner: -- git output follows --\n'
+        'vcversioner: fatal: whatever\n' % ('doof', 'version.txt'))
+
+def test_no_git_output_on_version_unparsable(capsys):
+    "The output from git is not shown if git succeeded but the version couldn't be parsed."
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=invalid, version_file='version.txt', git_args=[])
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        "vcversioner: %r (from git) couldn't be parsed into a version.\n" % ('foob',))
+
+def test_no_output_on_success(capsys):
+    "There is no output if everything succeeded."
+    vcversioner.find_version(Popen=basic_version)
+    out, err = capsys.readouterr()
+    assert not out
+    assert not err
+
+def test_no_output_on_version_file_success(tmpdir, capsys):
+    "There is no output if everything succeeded, even if the version was read from a version file."
+    tmpdir.chdir()
+    tmpdir.join('version.txt').write('1.0-0-gbeef')
+    vcversioner.find_version(Popen=git_failed)
+    out, err = capsys.readouterr()
+    assert not out
+    assert not err
 
 
 class Struct(object):

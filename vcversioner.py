@@ -119,25 +119,36 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     # try to pull the version from git, or (perhaps) fall back on a
     # previously-saved version.
     try:
-        proc = Popen(git_args, stdout=subprocess.PIPE)
+        proc = Popen(git_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError:
         raw_version = None
+        git_output = []
     else:
-        raw_version = proc.communicate()[0].strip().decode()
+        stdout, stderr = proc.communicate()
+        raw_version = stdout.strip().decode()
+        git_output = stderr.decode().splitlines()
         version_source = 'git'
+
+    def show_git_output():
+        if not git_output:
+            return
+        print('-- git output follows --')
+        for line in git_output:
+            print(line)
 
     # git failed if the string is empty
     if not raw_version:
         if version_file is None:
-            print('%r failed' % (git_args,))
+            print('%r failed.' % (git_args,))
+            show_git_output()
             raise SystemExit(2)
         elif not os.path.exists(version_file):
             print("%r failed and %r isn't present." % (git_args, version_file))
             print("are you installing from a github tarball?")
+            show_git_output()
             raise SystemExit(2)
-        print("couldn't determine version from git; using %r" % version_file)
         with open(version_file, 'r') as infile:
-            raw_version = infile.read()
+            raw_version = infile.read().decode()
         version_source = repr(version_file)
 
 
@@ -145,8 +156,9 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     try:
         tag_version, commits, sha = raw_version.rsplit('-', 2)
     except ValueError:
-        print("%r (from %s) couldn't be parsed into a version" % (
+        print("%r (from %s) couldn't be parsed into a version." % (
             raw_version, version_source))
+        show_git_output()
         raise SystemExit(2)
 
     if version_file is not None:
