@@ -11,7 +11,7 @@ import vcversioner
 
 
 class FakePopen(object):
-    def __init__(self, stdout, stderr=''):
+    def __init__(self, stdout, stderr=b''):
         self.stdout = stdout
         self.stderr = stderr
 

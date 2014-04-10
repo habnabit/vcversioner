@@ -147,7 +147,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
             print("are you installing from a github tarball?")
             show_git_output()
             raise SystemExit(2)
-        with open(version_file, 'r') as infile:
+        with open(version_file, 'rb') as infile:
             raw_version = infile.read().decode()
         version_source = repr(version_file)
 
