@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Aaron Gallagher <_@habnab.it>
+# Copyright (c) 2013-2014, Aaron Gallagher <_@habnab.it>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
