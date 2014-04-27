@@ -10,6 +10,12 @@ import pytest
 import vcversioner
 
 
+try:
+    unicode
+except NameError:
+    unicode = str
+
+
 class FakePopen(object):
     def __init__(self, stdout, stderr=b''):
         self.stdout = stdout
@@ -31,6 +37,7 @@ empty = FakePopen(b'')
 invalid = FakePopen(b'foob')
 basic_version = FakePopen(b'1.0-0-gbeef')
 dev_version = FakePopen(b'1.0-2-gfeeb')
+hg_version = FakePopen(b'1.0-1-hgbeef')
 git_failed = FakePopen(b'', b'fatal: whatever')
 
 
@@ -45,6 +52,12 @@ class FakeOpen(object):
 def gitdir(tmpdir):
     tmpdir.chdir()
     tmpdir.join('.git').mkdir()
+    return tmpdir
+
+@pytest.fixture
+def hgdir(tmpdir):
+    tmpdir.chdir()
+    tmpdir.join('.hg').mkdir()
     return tmpdir
 
 
@@ -134,8 +147,9 @@ def test_custom_vcs_args_substitutions(gitdir):
         vcversioner.find_version(Popen=popen, vcs_args=('foo', 'bar', '%(pwd)s', '%(root)s'))
     assert popen.args[0] == ['foo', 'bar', gitdir.strpath, gitdir.strpath]
 
-def test_custom_vcs_args_substitutions_with_different_root():
+def test_custom_vcs_args_substitutions_with_different_root(tmpdir):
     "Specifying a different root will cause that root to be substituted."
+    tmpdir.chdir()
     popen = RaisingFakePopen()
     with pytest.raises(SystemExit):
         vcversioner.find_version(Popen=popen, root='/spam', vcs_args=('%(root)s',))
@@ -175,15 +189,18 @@ def test_version_file_disabled_Popen_raises(gitdir):
     assert excinfo.value.args[0] == 2
     assert not gitdir.join('version.txt').check()
 
-def test_namedtuple():
+def test_namedtuple(tmpdir):
     "The output namedtuple has attribute names too."
-
-    version = vcversioner.find_version(Popen=basic_version, version_file=None)
+    tmpdir.chdir()
+    version = vcversioner.find_version(Popen=basic_version, version_file=None, vcs_args=[])
     assert version.version == '1.0'
     assert version.commits == '0'
     assert version.sha == 'gbeef'
 
-    version = vcversioner.find_version(Popen=dev_version, version_file=None)
+def test_namedtuple(tmpdir):
+    "The output namedtuple can have a nonzero number of commits."
+    tmpdir.chdir()
+    version = vcversioner.find_version(Popen=dev_version, version_file=None, vcs_args=[])
     assert version.version == '1.0.dev2'
     assert version.commits == '2'
     assert version.sha == 'gfeeb'
@@ -202,7 +219,7 @@ __sha__ = 'gbeef'
 __revision__ = 'gbeef'
 """
 
-def test_git_arg_path_translation(monkeypatch):
+def test_git_arg_path_translation(gitdir, monkeypatch):
     "/ is translated into the correct path separator in git arguments."
     monkeypatch.setattr(os, 'sep', ':')
     popen = RaisingFakePopen()
@@ -210,7 +227,7 @@ def test_git_arg_path_translation(monkeypatch):
         vcversioner.find_version(Popen=popen, vcs_args=['spam/eggs'], version_file=None)
     assert popen.args[0] == ['spam:eggs']
 
-def test_version_file_path_translation(monkeypatch):
+def test_version_file_path_translation(gitdir, monkeypatch):
     "/ is translated into the correct path separator for version.txt."
     monkeypatch.setattr(os, 'sep', ':')
     open = FakeOpen()
@@ -218,7 +235,7 @@ def test_version_file_path_translation(monkeypatch):
         vcversioner.find_version(Popen=basic_version, open=open, version_file='spam/eggs', vcs_args=[])
     assert open.args[0] == 'spam:eggs'
 
-def test_git_output_on_no_version_file(capsys):
+def test_git_output_on_no_version_file(gitdir, capsys):
     "The output from git is shown if it failed and the version file is disabled."
     with pytest.raises(SystemExit):
         vcversioner.find_version(Popen=git_failed, version_file=None, vcs_args=[])
@@ -262,7 +279,7 @@ def test_no_git_output_on_version_unparsable(capsys):
     assert out == (
         "vcversioner: %r (from VCS) couldn't be parsed into a version.\n" % ('foob',))
 
-def test_no_output_on_success(capsys):
+def test_no_output_on_success(gitdir, capsys):
     "There is no output if everything succeeded."
     vcversioner.find_version(Popen=basic_version)
     out, err = capsys.readouterr()
@@ -282,16 +299,80 @@ def test_strip_leading_v(gitdir):
     version = vcversioner.find_version(Popen=FakePopen(b'v1.0-0-gbeef'))
     assert version == ('1.0', '0', 'gbeef')
 
+def test_git_args_deprecation(gitdir):
+    "git_args is deprecated."
+    pytest.deprecated_call(vcversioner.find_version, git_args=['git', 'spam'], Popen=basic_version)
+
+def test_git_args_still_works(gitdir):
+    "git_args still works like vcs_args."
+    popen = RaisingFakePopen()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(git_args=['git', 'spam'], Popen=popen)
+    assert popen.args[0] == ['git', 'spam']
+
+def test_hg_detection(hgdir):
+    ".hg directories get detected and the appropriate hg command gets run."
+    popen = RaisingFakePopen()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(Popen=popen)
+    assert popen.args[0] == [
+        'hg', 'log', '-R', hgdir.strpath, '-r', '.', '--template',
+        '{latesttag}-{latesttagdistance}-hg{node|short}']
+
+def test_no_vcs_no_version_file(tmpdir, capsys):
+    "If no VCS is detected with no version_file, vcversioner aborts."
+    tmpdir.chdir()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(version_file=None, Popen=basic_version)
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        'vcversioner: no VCS could be detected in %r.\n' % (unicode(tmpdir.strpath),))
+
+def test_no_vcs_absent_version_file(tmpdir, capsys):
+    "If no VCS is detected with an absent version_file, vcversioner aborts."
+    tmpdir.chdir()
+    with pytest.raises(SystemExit):
+        vcversioner.find_version(version_file='version.txt', Popen=basic_version)
+    out, err = capsys.readouterr()
+    assert not err
+    assert out == (
+        "vcversioner: no VCS could be detected in %r and %r isn't present.\n"
+        "vcversioner: are you installing from a github tarball?\n" % (
+            unicode(tmpdir.strpath), 'version.txt'))
+
+def test_decrement_dev_version(gitdir):
+    "decrement_dev_version will subtract one from the number of commits."
+    version = vcversioner.find_version(decrement_dev_version=True, Popen=dev_version)
+    assert version == ('1.0.dev1', '1', 'gfeeb')
+
+def test_decrement_dev_version_to_zero(gitdir):
+    "decrement_dev_version with one commit will produce a non-dev version number."
+    version = vcversioner.find_version(decrement_dev_version=True, Popen=FakePopen(b'1.0-1-gbeef'))
+    assert version == ('1.0', '0', 'gbeef')
+
+def test_automatic_decrement_dev_version_with_hg(hgdir):
+    "decrement_dev_version gets turned on automatically with hg revisions."
+    version = vcversioner.find_version(Popen=hg_version)
+    assert version == ('1.0', '0', 'hgbeef')
+
+def test_automatic_decrement_dev_version_disabled(hgdir):
+    "decrement_dev_version does not get turned on automatically if explicitly disabled."
+    version = vcversioner.find_version(decrement_dev_version=False, Popen=hg_version)
+    assert version == ('1.0.dev1', '1', 'hgbeef')
+
 
 class Struct(object):
     pass
 
-def test_setup_astounding_success():
+def test_setup_astounding_success(tmpdir):
     "``find_version`` can be called through distutils too."
+    tmpdir.chdir()
     dist = Struct()
     dist.metadata = Struct()
     vcversioner.setup(
         dist, 'vcversioner',
-        {str('Popen'): basic_version, str('version_file'): None})
+        {str('Popen'): basic_version, str('version_file'): None,
+         str('vcs_args'): []})
     assert dist.version == '1.0'
     assert dist.metadata.version == '1.0'

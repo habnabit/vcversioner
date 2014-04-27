@@ -152,26 +152,29 @@ def find_version(include_dev_version=True, root='%(pwd)s',
             if os.path.exists(substitute(path)):
                 vcs_args = args
                 break
+
+    raw_version = None
+    vcs_output = []
+
+    if vcs_args is not None:
+        vcs_args = [substitute(arg) for arg in vcs_args]
+        if version_file is not None:
+            version_file = substitute(version_file)
+
+        # try to pull the version from some VCS, or (perhaps) fall back on a
+        # previously-saved version.
+        try:
+            proc = Popen(vcs_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        except OSError:
+            pass
         else:
-            print('no VCS could be detected in %(root)r' % substitutions)
-            raise SystemExit(2)
-
-    vcs_args = [substitute(arg) for arg in vcs_args]
-    if version_file is not None:
-        version_file = substitute(version_file)
-
-    # try to pull the version from some VCS, or (perhaps) fall back on a
-    # previously-saved version.
-    try:
-        proc = Popen(vcs_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except OSError:
-        raw_version = None
-        vcs_output = []
+            stdout, stderr = proc.communicate()
+            raw_version = stdout.strip().decode()
+            vcs_output = stderr.decode().splitlines()
+            version_source = 'VCS'
+        failure = '%r failed' % (vcs_args,)
     else:
-        stdout, stderr = proc.communicate()
-        raw_version = stdout.strip().decode()
-        vcs_output = stderr.decode().splitlines()
-        version_source = 'VCS'
+        failure = 'no VCS could be detected in %(root)r' % substitutions
 
     def show_vcs_output():
         if not vcs_output:
@@ -183,11 +186,11 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     # VCS failed if the string is empty
     if not raw_version:
         if version_file is None:
-            print('%r failed.' % (vcs_args,))
+            print('%s.' % (failure,))
             show_vcs_output()
             raise SystemExit(2)
         elif not os.path.exists(version_file):
-            print("%r failed and %r isn't present." % (vcs_args, version_file))
+            print("%s and %r isn't present." % (failure, version_file))
             print("are you installing from a github tarball?")
             show_vcs_output()
             raise SystemExit(2)
