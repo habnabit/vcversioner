@@ -87,13 +87,13 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         module path, ``package/__init__.py`` could do ``from package._version
         import __version__, __sha__``.
 
-    :param vcs_args: The git command to run to get a version. By default, this
-        is ``git --git-dir %(root)s/.git describe --tags --long``.
-        ``--git-dir`` is used to prevent contamination from git repositories
-        which aren't the git repository of your project. Specify this as a list
-        of string arguments including ``git``, e.g. ``['git', 'describe']``.
-        Standard substitutions are performed on each value in the provided
-        list.
+    :param git_args: **Deprecated.** Please use *vcs_args* instead.
+
+    :param vcs_args: The command to run to get a version. By default, this is
+        automatically guessed from directories present in the repository root.
+        Specify this as a list of string arguments including the program to
+        run, e.g. ``['git', 'describe']``. Standard substitutions are performed
+        on each value in the provided list.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
@@ -110,6 +110,21 @@ def find_version(include_dev_version=True, root='%(pwd)s',
 
     ``/`` will automatically be translated into the correct path separator for
     the current platform, such as ``:`` or ``\``.
+
+    ``vcversioner`` will perform automatic VCS detection with the following
+    directories, in order, and run the specified commands.
+
+       ``%(root)s/.git``
+
+          ``git --git-dir %(root)s/.git describe --tags --long``. ``--git-dir``
+          is used to prevent contamination from git repositories which aren't
+          the git repository of your project.
+
+       ``%(root)s/.hg``
+
+          ``hg log -R %(root)s -r . --template
+          '{latesttag}-{latesttagdistance}-hg{node|short}'``. ``-R`` is
+          similarly used to prevent contamination.
 
     """
 
