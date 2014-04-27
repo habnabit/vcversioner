@@ -24,6 +24,7 @@ from __future__ import print_function, unicode_literals
 import collections
 import os
 import subprocess
+import warnings
 
 
 Version = collections.namedtuple('Version', 'version commits sha')
@@ -39,10 +40,18 @@ def _fix_path(p):
     return p.replace('/', os.sep)
 
 
+_vcs_args_by_path = [
+    ('%(root)s/.git', (
+        'git', '--git-dir', '%(root)s/.git', 'describe', '--tags', '--long')),
+    ('%(root)s/.hg', (
+        'hg', 'log', '-R', '%(root)s', '-r', '.', '--template',
+        '{latesttag}-{latesttagdistance}-hg{node|short}')),
+]
+
+
 def find_version(include_dev_version=True, root='%(pwd)s',
                  version_file='%(root)s/version.txt', version_module_paths=(),
-                 git_args=('git', '--git-dir', '%(root)s/.git', 'describe',
-                           '--tags', '--long'),
+                 git_args=None, vcs_args=None,
                  Popen=subprocess.Popen, open=open):
     """Find an appropriate version number from version control.
 
@@ -112,40 +121,58 @@ def find_version(include_dev_version=True, root='%(pwd)s',
 
     substitutions = {'pwd': os.getcwd()}
     substitutions['root'] = root % substitutions
-    git_args = [_fix_path(arg % substitutions) for arg in git_args]
-    if version_file is not None:
-        version_file = _fix_path(version_file % substitutions)
+    def substitute(val):
+        return _fix_path(val % substitutions)
 
-    # try to pull the version from git, or (perhaps) fall back on a
+    if git_args is not None:
+        warnings.warn(
+            'passing `git_args is deprecated; please use vcs_args',
+            DeprecationWarning)
+        vcs_args = git_args
+
+    if vcs_args is None:
+        for path, args in _vcs_args_by_path:
+            if os.path.exists(substitute(path)):
+                vcs_args = args
+                break
+        else:
+            print('no VCS could be detected in %(root)r' % substitutions)
+            raise SystemExit(2)
+
+    vcs_args = [substitute(arg) for arg in vcs_args]
+    if version_file is not None:
+        version_file = substitute(version_file)
+
+    # try to pull the version from some VCS, or (perhaps) fall back on a
     # previously-saved version.
     try:
-        proc = Popen(git_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = Popen(vcs_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError:
         raw_version = None
-        git_output = []
+        vcs_output = []
     else:
         stdout, stderr = proc.communicate()
         raw_version = stdout.strip().decode()
-        git_output = stderr.decode().splitlines()
-        version_source = 'git'
+        vcs_output = stderr.decode().splitlines()
+        version_source = 'VCS'
 
-    def show_git_output():
-        if not git_output:
+    def show_vcs_output():
+        if not vcs_output:
             return
-        print('-- git output follows --')
-        for line in git_output:
+        print('-- VCS output follows --')
+        for line in vcs_output:
             print(line)
 
-    # git failed if the string is empty
+    # VCS failed if the string is empty
     if not raw_version:
         if version_file is None:
-            print('%r failed.' % (git_args,))
-            show_git_output()
+            print('%r failed.' % (vcs_args,))
+            show_vcs_output()
             raise SystemExit(2)
         elif not os.path.exists(version_file):
-            print("%r failed and %r isn't present." % (git_args, version_file))
+            print("%r failed and %r isn't present." % (vcs_args, version_file))
             print("are you installing from a github tarball?")
-            show_git_output()
+            show_vcs_output()
             raise SystemExit(2)
         with open(version_file, 'rb') as infile:
             raw_version = infile.read().decode()
@@ -158,7 +185,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     except ValueError:
         print("%r (from %s) couldn't be parsed into a version." % (
             raw_version, version_source))
-        show_git_output()
+        show_vcs_output()
         raise SystemExit(2)
 
     # remove leading 'v'
