@@ -140,6 +140,8 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     substitutions['root'] = root % substitutions
     def substitute(val):
         return _fix_path(val % substitutions)
+    if version_file is not None:
+        version_file = substitute(version_file)
 
     if git_args is not None:
         warnings.warn(
@@ -158,8 +160,6 @@ def find_version(include_dev_version=True, root='%(pwd)s',
 
     if vcs_args is not None:
         vcs_args = [substitute(arg) for arg in vcs_args]
-        if version_file is not None:
-            version_file = substitute(version_file)
 
         # try to pull the version from some VCS, or (perhaps) fall back on a
         # previously-saved version.

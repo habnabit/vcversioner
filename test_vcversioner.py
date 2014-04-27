@@ -197,7 +197,7 @@ def test_namedtuple(tmpdir):
     assert version.commits == '0'
     assert version.sha == 'gbeef'
 
-def test_namedtuple(tmpdir):
+def test_namedtuple_nonzero_commits(tmpdir):
     "The output namedtuple can have a nonzero number of commits."
     tmpdir.chdir()
     version = vcversioner.find_version(Popen=dev_version, version_file=None, vcs_args=[])
@@ -360,6 +360,13 @@ def test_automatic_decrement_dev_version_disabled(hgdir):
     "decrement_dev_version does not get turned on automatically if explicitly disabled."
     version = vcversioner.find_version(decrement_dev_version=False, Popen=hg_version)
     assert version == ('1.0.dev1', '1', 'hgbeef')
+
+def test_version_file_substituted_with_no_vcs(tmpdir):
+    "The version file is substituted even if no VCS is present."
+    tmpdir.chdir()
+    tmpdir.join('version.txt').write('1.0-0-gbeef')
+    version = vcversioner.find_version(Popen=empty)
+    assert version == ('1.0', '0', 'gbeef')
 
 
 class Struct(object):
