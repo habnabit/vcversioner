@@ -51,7 +51,7 @@ _vcs_args_by_path = [
 
 def find_version(include_dev_version=True, root='%(pwd)s',
                  version_file='%(root)s/version.txt', version_module_paths=(),
-                 git_args=None, vcs_args=None,
+                 git_args=None, vcs_args=None, decrement_dev_version=None,
                  Popen=subprocess.Popen, open=open):
     """Find an appropriate version number from version control.
 
@@ -95,6 +95,13 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         Specify this as a list of string arguments including the program to
         run, e.g. ``['git', 'describe']``. Standard substitutions are performed
         on each value in the provided list.
+
+    :param decrement_dev_version: If ``True``, subtract one from the number of
+        commits after the most recent tag. This is primarily for hg, as hg
+        requires a commit to make a tag. If the VCS used is hg (i.e. the
+        basename of the first item in *vcs_args* is ``'hg'``) and
+        *decrement_dev_version* is not specified as ``False``,
+        *decrement_dev_version* will be set to ``True``.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
@@ -204,6 +211,12 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     if version_file is not None:
         with open(version_file, 'w') as outfile:
             outfile.write(raw_version)
+
+    if os.path.basename(vcs_args[0]) == 'hg' and decrement_dev_version is None:
+        decrement_dev_version = True
+
+    if decrement_dev_version:
+        commits = str(int(commits) - 1)
 
     if commits == '0' or not include_dev_version:
         version = tag_version
