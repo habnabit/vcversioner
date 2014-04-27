@@ -65,41 +65,35 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     in release tarballs by way of the ``MANIFEST.in`` file.
 
     :param include_dev_version: By default, if there are any commits after the
-                                most recent tag (as reported by git), that
-                                number will be included in the version number
-                                as a ``.dev`` suffix. For example, if the most
-                                recent tag is ``1.0`` and there have been three
-                                commits after that tag, the version number will
-                                be ``1.0.dev3``. This behavior can be disabled
-                                by setting this parameter to ``False``.
+        most recent tag (as reported by git), that number will be included in
+        the version number as a ``.dev`` suffix. For example, if the most
+        recent tag is ``1.0`` and there have been three commits after that tag,
+        the version number will be ``1.0.dev3``. This behavior can be disabled
+        by setting this parameter to ``False``.
 
     :param root: The directory of the repository root. The default value is the
-                 current working directory, since when running ``setup.py``,
-                 this is often (but not always) the same as the current working
-                 directory. Standard substitutions are performed on this value.
+        current working directory, since when running ``setup.py``, this is
+        often (but not always) the same as the current working directory.
+        Standard substitutions are performed on this value.
 
     :param version_file: The name of the file where version information will be
-                         saved. Reading and writing version files can be
-                         disabled altogether by setting this parameter to
-                         ``None``. Standard substitutions are performed on this
-                         value.
+        saved. Reading and writing version files can be disabled altogether by
+        setting this parameter to ``None``. Standard substitutions are
+        performed on this value.
 
     :param version_module_paths: A list of python modules which will be
-                                 automatically generated containing
-                                 ``__version__`` and ``__sha__`` attributes.
-                                 For example, with ``package/_version.py`` as a
-                                 version module path, ``package/__init__.py``
-                                 could do ``from package._version import
-                                 __version__, __sha__``.
+        automatically generated containing ``__version__`` and ``__sha__``
+        attributes. For example, with ``package/_version.py`` as a version
+        module path, ``package/__init__.py`` could do ``from package._version
+        import __version__, __sha__``.
 
-    :param git_args: The git command to run to get a version. By default, this
-                     is ``git --git-dir %(root)s/.git describe --tags --long``.
-                     ``--git-dir`` is used to prevent contamination from git
-                     repositories which aren't the git repository of your
-                     project. Specify this as a list of string arguments
-                     including ``git``, e.g. ``['git', 'describe']``. Standard
-                     substitutions are performed on each value in the provided
-                     list.
+    :param vcs_args: The git command to run to get a version. By default, this
+        is ``git --git-dir %(root)s/.git describe --tags --long``.
+        ``--git-dir`` is used to prevent contamination from git repositories
+        which aren't the git repository of your project. Specify this as a list
+        of string arguments including ``git``, e.g. ``['git', 'describe']``.
+        Standard substitutions are performed on each value in the provided
+        list.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
