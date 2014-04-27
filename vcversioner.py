@@ -57,16 +57,17 @@ def find_version(include_dev_version=True, root='%(pwd)s',
 
     It's much more convenient to be able to use your version control system's
     tagging mechanism to derive a version number than to have to duplicate that
-    information all over the place. Currently, only git is supported.
+    information all over the place.
 
     The default behavior is to write out a ``version.txt`` file which contains
-    the git output, for systems where git isn't installed or there is no .git
-    directory present. ``version.txt`` can (and probably should!) be packaged
-    in release tarballs by way of the ``MANIFEST.in`` file.
+    the VCS output, for systems where the appropriate VCS is not installed or
+    there is no VCS metadata directory present. ``version.txt`` can (and
+    probably should!) be packaged in release tarballs by way of the
+    ``MANIFEST.in`` file.
 
     :param include_dev_version: By default, if there are any commits after the
-        most recent tag (as reported by git), that number will be included in
-        the version number as a ``.dev`` suffix. For example, if the most
+        most recent tag (as reported by the VCS), that number will be included
+        in the version number as a ``.dev`` suffix. For example, if the most
         recent tag is ``1.0`` and there have been three commits after that tag,
         the version number will be ``1.0.dev3``. This behavior can be disabled
         by setting this parameter to ``False``.
