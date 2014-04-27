@@ -104,9 +104,9 @@ version information. For example, with a package named ``spam``::
   )
 
 This will generate a ``spam/_version.py`` file that defines ``__version__`` and
-``__sha__``. Then, in ``spam/__init__.py``::
+``__revision__``. Then, in ``spam/__init__.py``::
 
-  from spam._version import __version__, __sha__
+  from spam._version import __version__, __revision__
 
 Since this acts like (and *is*) a regular python module, changing
 ``MANIFEST.in`` is not required.
