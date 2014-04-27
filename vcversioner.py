@@ -99,9 +99,9 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     :param decrement_dev_version: If ``True``, subtract one from the number of
         commits after the most recent tag. This is primarily for hg, as hg
         requires a commit to make a tag. If the VCS used is hg (i.e. the
-        basename of the first item in *vcs_args* is ``'hg'``) and
-        *decrement_dev_version* is not specified as ``False``,
-        *decrement_dev_version* will be set to ``True``.
+        shorthash starts with ``'hg'``) and *decrement_dev_version* is not
+        specified as ``False``, *decrement_dev_version* will be set to
+        ``True``.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
@@ -212,7 +212,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         with open(version_file, 'w') as outfile:
             outfile.write(raw_version)
 
-    if os.path.basename(vcs_args[0]) == 'hg' and decrement_dev_version is None:
+    if sha.startswith('hg') and decrement_dev_version is None:
         decrement_dev_version = True
 
     if decrement_dev_version:
