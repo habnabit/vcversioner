@@ -5,7 +5,7 @@ vcversioner
 ===========
 
 `Elevator pitch`_: you can write a ``setup.py`` with no version information
-specified, and vcversioner will find a recent, properly-formatted git tag and
+specified, and vcversioner will find a recent, properly-formatted VCS tag and
 extract a version from it.
 
 It's much more convenient to be able to use your version control system's
@@ -35,17 +35,17 @@ and updates the project's version. The parameter to the ``vcversioner``
 argument can also be a dict of keyword arguments which |find_version|
 will be called with.
 
-To allow tarballs to be distributed without requiring a ``.git`` directory,
-vcversioner will also write out a file named (by default) ``version.txt``.
-Then, if there is no git or git is unable to find any version information,
-vcversioner will read version information from the ``version.txt`` file.
-However, this file needs to be included in a distributed tarball, so the
-following line should be added to ``MANIFEST.in``::
+To allow tarballs to be distributed without requiring a ``.git`` (or ``.hg``,
+etc.) directory, vcversioner will also write out a file named (by default)
+``version.txt``. Then, if there is no VCS program or the program is unable to
+find any version information, vcversioner will read version information from
+the ``version.txt`` file. However, this file needs to be included in a
+distributed tarball, so the following line should be added to ``MANIFEST.in``::
 
   include version.txt
 
-This isn't necessary if ``setup.py`` will always be run from a git checkout,
-but otherwise is essential for vcversioner to know what version to use.
+This isn't necessary if ``setup.py`` will always be run from a checkout, but
+otherwise is essential for vcversioner to know what version to use.
 
 The name ``version.txt`` also can be changed by specifying the ``version_file``
 parameter. For example::
@@ -112,14 +112,19 @@ Since this acts like (and *is*) a regular python module, changing
 ``MANIFEST.in`` is not required.
 
 
-Customizing git commands
+Customizing VCS commands
 ------------------------
 
-vcversioner by default executes ``git describe --tags --long`` to get version
-information. This command will output a string that describes the current
-commit, using all tags (as opposed to just unannotated tags), and always output
-the long format (``1.0-0-gdeadbeef`` instead of just ``1.0`` if the current
-commit is tagged).
+vcversioner by default tries to detect which VCS is being used and picks a
+command to run based on that. For git, that is ``git --git-dir %(root)s/.git
+describe --tags --long``. For hg, that is ``hg log -R %(root)s -r . --template
+'{latesttag}-{latesttagdistance}-hg{node|short}'``.
+
+Any command should output a string that describes the current commit in the
+format ``1.0-0-gdeadbeef``. Specifically, that is ``<version number>-<number of
+commits between the current commit and the version tagged commit>-<revision>``.
+The revision should have a VCS-specific prefix, e.g. ``g`` for git and ``hg``
+for hg.
 
 However, sometimes this isn't sufficient. If someone wanted to only use
 annotated tags, the git command could be amended like so::
@@ -130,13 +135,16 @@ annotated tags, the git command could be amended like so::
       # [...]
       setup_requires=['vcversioner'],
       vcversioner={
-          'git_args': ['git', 'describe', '--long'],
+          'vcs_args': ['git', 'describe', '--long'],
       },
   )
 
-The ``git_args`` parameter must always be a list of strings, which will not be
+The ``vcs_args`` parameter must always be a list of strings, which will not be
 interpreted by the shell. This is the same as what ``subprocess.Popen``
 expects.
+
+This argument used to be spelled ``git_args`` until support for multiple VCS
+systems was added.
 
 
 Development versions
@@ -152,13 +160,19 @@ This behavior can be disabled by setting the ``include_dev_version`` parameter
 to ``False``. In that case, the aforementioned untagged commit's version would
 be just ``1.0``.
 
+Since hg requires a commit to make a tag, there's a parameter
+``decrement_dev_version`` to subtract one from the number of commits after the
+most recent tag. If the VCS used is detected to be hg (i.e. the revision starts
+with ``'hg'``) and ``decrement_dev_version`` is not specified as ``False``,
+``decrement_dev_version`` will be automatically set to ``True``.
+
 
 Project roots
 -------------
 
-In order to prevent contamination from other git repositories, vcversioner in
-the 1.x version series will only look in the project root directory for a git
-repository. The project root defaults to the current working directory, which
+In order to prevent contamination from other source repositories, vcversioner
+in the 1.x version series will only look in the project root directory for
+repositories. The project root defaults to the current working directory, which
 is often the case when running setup.py. This can be changed by specifying the
 ``root`` parameter. Someone concerned with being able to run setup.py from
 directories other than the directory containing setup.py should determine the
@@ -175,7 +189,7 @@ project root from ``__file__`` in setup.py::
       },
   )
 
-To get the same behavior in the 0.x version series, ``git_args`` can be set to
+To get the same behavior in the 0.x version series, ``vcs_args`` can be set to
 include the ``--git-dir`` flag::
 
   from setuptools import setup
@@ -184,7 +198,7 @@ include the ``--git-dir`` flag::
       # [...]
       setup_requires=['vcversioner'],
       vcversioner={
-          git_args=['git', '--git-dir', '%(root)s/.git', 'describe',
+          vcs_args=['git', '--git-dir', '%(root)s/.git', 'describe',
                     '--tags', '--long'],
       },
   )
@@ -195,7 +209,7 @@ By default, ``version.txt`` is also read from the project root.
 Substitutions
 ~~~~~~~~~~~~~
 
-As seen above, *root*, *version_file*, and *git_args* each support some
+As seen above, *root*, *version_file*, and *vcs_args* each support some
 substitutions:
 
 ``%(root)s``

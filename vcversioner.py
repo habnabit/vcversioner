@@ -99,7 +99,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     :param decrement_dev_version: If ``True``, subtract one from the number of
         commits after the most recent tag. This is primarily for hg, as hg
         requires a commit to make a tag. If the VCS used is hg (i.e. the
-        shorthash starts with ``'hg'``) and *decrement_dev_version* is not
+        revision starts with ``'hg'``) and *decrement_dev_version* is not
         specified as ``False``, *decrement_dev_version* will be set to
         ``True``.
 
