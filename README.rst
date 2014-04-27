@@ -60,6 +60,10 @@ parameter. For example::
       },
   )
 
+For compatibility with `semantic versioning`_, ``vcversioner`` will strip
+leading ``'v'``\ s  from version tags. That is, the tag ``v1.0`` will be
+treated as if it was ``1.0``.
+
 
 Non-hook usage
 --------------
@@ -269,5 +273,6 @@ https://readthedocs.org/dashboard/vcversioner/edit/)
 .. _PEP 386: http://www.python.org/dev/peps/pep-0386/
 .. _Sphinx: http://sphinx-doc.org
 .. _Read the Docs: https://readthedocs.org/
+.. _semantic versioning: http://semver.org/
 
 .. |find_version| replace:: ``find_version``

@@ -289,6 +289,12 @@ def test_no_output_on_version_file_success(tmpdir, capsys):
     assert not out
     assert not err
 
+def test_strip_leading_v(tmpdir):
+    "Leading 'v's are stripped from tags."
+    tmpdir.chdir()
+    version = vcversioner.find_version(Popen=FakePopen(b'v1.0-0-gbeef'))
+    assert version == ('1.0', '0', 'gbeef')
+
 
 class Struct(object):
     pass

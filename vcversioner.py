@@ -161,6 +161,9 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         show_git_output()
         raise SystemExit(2)
 
+    # remove leading 'v'
+    tag_version = tag_version.lstrip('v')
+
     if version_file is not None:
         with open(version_file, 'w') as outfile:
             outfile.write(raw_version)
