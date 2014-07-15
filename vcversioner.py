@@ -67,9 +67,9 @@ def find_version(include_dev_version=True, root='%(pwd)s',
 
     :param include_dev_version: By default, if there are any commits after the
         most recent tag (as reported by the VCS), that number will be included
-        in the version number as a ``.dev`` suffix. For example, if the most
+        in the version number as a ``.post`` suffix. For example, if the most
         recent tag is ``1.0`` and there have been three commits after that tag,
-        the version number will be ``1.0.dev3``. This behavior can be disabled
+        the version number will be ``1.0.post3``. This behavior can be disabled
         by setting this parameter to ``False``.
 
     :param root: The directory of the repository root. The default value is the
@@ -224,7 +224,7 @@ def find_version(include_dev_version=True, root='%(pwd)s',
     if commits == '0' or not include_dev_version:
         version = tag_version
     else:
-        version = '%s.dev%s' % (tag_version, commits)
+        version = '%s.post%s' % (tag_version, commits)
 
     for path in version_module_paths:
         with open(path, 'w') as outfile:

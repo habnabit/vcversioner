@@ -120,14 +120,14 @@ def test_invalid_version_file(gitdir):
     assert excinfo.value.args[0] == 2
 
 def test_dev_version(gitdir):
-    ".dev version numbers are automatically created."
+    ".post version numbers are automatically created."
     version = vcversioner.find_version(Popen=dev_version)
-    assert version == ('1.0.dev2', '2', 'gfeeb')
+    assert version == ('1.0.post2', '2', 'gfeeb')
     with gitdir.join('version.txt').open() as infile:
         assert infile.read() == '1.0-2-gfeeb'
 
 def test_dev_version_disabled(gitdir):
-    ".dev version numbers can also be disabled."
+    ".post version numbers can also be disabled."
     version = vcversioner.find_version(Popen=dev_version, include_dev_version=False)
     assert version == ('1.0', '2', 'gfeeb')
     with gitdir.join('version.txt').open() as infile:
@@ -201,7 +201,7 @@ def test_namedtuple_nonzero_commits(tmpdir):
     "The output namedtuple can have a nonzero number of commits."
     tmpdir.chdir()
     version = vcversioner.find_version(Popen=dev_version, version_file=None, vcs_args=[])
-    assert version.version == '1.0.dev2'
+    assert version.version == '1.0.post2'
     assert version.commits == '2'
     assert version.sha == 'gfeeb'
 
@@ -344,7 +344,7 @@ def test_no_vcs_absent_version_file(tmpdir, capsys):
 def test_decrement_dev_version(gitdir):
     "decrement_dev_version will subtract one from the number of commits."
     version = vcversioner.find_version(decrement_dev_version=True, Popen=dev_version)
-    assert version == ('1.0.dev1', '1', 'gfeeb')
+    assert version == ('1.0.post1', '1', 'gfeeb')
 
 def test_decrement_dev_version_to_zero(gitdir):
     "decrement_dev_version with one commit will produce a non-dev version number."
@@ -359,7 +359,7 @@ def test_automatic_decrement_dev_version_with_hg(hgdir):
 def test_automatic_decrement_dev_version_disabled(hgdir):
     "decrement_dev_version does not get turned on automatically if explicitly disabled."
     version = vcversioner.find_version(decrement_dev_version=False, Popen=hg_version)
-    assert version == ('1.0.dev1', '1', 'hgbeef')
+    assert version == ('1.0.post1', '1', 'hgbeef')
 
 def test_version_file_substituted_with_no_vcs(tmpdir):
     "The version file is substituted even if no VCS is present."

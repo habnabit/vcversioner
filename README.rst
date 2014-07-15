@@ -152,9 +152,9 @@ Development versions
 
 vcversioner can also automatically make a version that corresponds to a commit
 that isn't itself tagged. Following `PEP 386`_, this is done by adding a
-``.dev`` suffix to the version specified by a tag on an earlier commit. For
+``.post`` suffix to the version specified by a tag on an earlier commit. For
 example, if the current commit is three revisions past the ``1.0`` tag, the
-computed version will be ``1.0.dev3``.
+computed version will be ``1.0.post3``.
 
 This behavior can be disabled by setting the ``include_dev_version`` parameter
 to ``False``. In that case, the aforementioned untagged commit's version would
