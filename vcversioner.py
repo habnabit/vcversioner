@@ -52,6 +52,7 @@ _vcs_args_by_path = [
 def find_version(include_dev_version=True, root='%(pwd)s',
                  version_file='%(root)s/version.txt', version_module_paths=(),
                  git_args=None, vcs_args=None, decrement_dev_version=None,
+                 strip_prefix='v',
                  Popen=subprocess.Popen, open=open):
     """Find an appropriate version number from version control.
 
@@ -102,6 +103,10 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         revision starts with ``'hg'``) and *decrement_dev_version* is not
         specified as ``False``, *decrement_dev_version* will be set to
         ``True``.
+
+    :param strip_prefix: A string which will be stripped from the start of
+        version number tags. By default this is ``'v'``, but could be
+        ``'debian/'`` for compatibility with ``git-dch``.
 
     :param Popen: Defaults to ``subprocess.Popen``. This is for testing.
 
@@ -208,8 +213,9 @@ def find_version(include_dev_version=True, root='%(pwd)s',
         show_vcs_output()
         raise SystemExit(2)
 
-    # remove leading 'v'
-    tag_version = tag_version.lstrip('v')
+    # remove leading prefix
+    if tag_version.startswith(strip_prefix):
+        tag_version = tag_version[len(strip_prefix):]
 
     if version_file is not None:
         with open(version_file, 'w') as outfile:

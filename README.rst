@@ -64,6 +64,10 @@ For compatibility with `semantic versioning`_, ``vcversioner`` will strip
 leading ``'v'``\ s  from version tags. That is, the tag ``v1.0`` will be
 treated as if it was ``1.0``.
 
+Other prefixes can be specified to be stripped by using the ``strip_prefix``
+argument to vcversioner. For compatibility with ``git-dch``, one could specify
+the ``strip_prefix`` as ``'debian/'``.
+
 
 Non-hook usage
 --------------

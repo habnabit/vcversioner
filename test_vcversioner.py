@@ -299,6 +299,11 @@ def test_strip_leading_v(gitdir):
     version = vcversioner.find_version(Popen=FakePopen(b'v1.0-0-gbeef'))
     assert version == ('1.0', '0', 'gbeef')
 
+def test_strip_leading_prefix(gitdir):
+    "The leading prefix stripped from tags can be customized."
+    version = vcversioner.find_version(Popen=FakePopen(b'debian/1.0-0-gbeef'), strip_prefix='debian/')
+    assert version == ('1.0', '0', 'gbeef')
+
 def test_git_args_deprecation(gitdir):
     "git_args is deprecated."
     pytest.deprecated_call(vcversioner.find_version, git_args=['git', 'spam'], Popen=basic_version)
