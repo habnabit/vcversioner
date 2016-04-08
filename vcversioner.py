@@ -262,4 +262,4 @@ def setup(dist, attr, value):
 
     """
 
-    dist.version = dist.metadata.version = find_version(**value).version
+    dist.metadata.version = find_version(**value).version
