@@ -386,5 +386,4 @@ def test_setup_astounding_success(tmpdir):
         dist, 'vcversioner',
         {str('Popen'): basic_version, str('version_file'): None,
          str('vcs_args'): []})
-    assert dist.version == '1.0'
     assert dist.metadata.version == '1.0'
